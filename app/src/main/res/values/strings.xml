@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Progress Button</string>
+
+    <string name="txt_download">Download</string>
+    <string name="txt_downloading">Please wait</string>
+    <string name="txt_download_completed">Download completed</string>
+</resources>
