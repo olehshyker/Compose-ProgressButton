@@ -90,6 +90,7 @@ internal fun ProgressButtonImpl(
     }
   }
 
+  // Drawing the button with progress and text
   Box(
     modifier = modifier
       .shadow(

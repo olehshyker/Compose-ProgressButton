@@ -10,7 +10,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 
-/** This method draws current progress and button text */
+/**
+ * Draws a progress bar with optional text on a canvas.
+ */
 internal fun DrawScope.drawProgressWithText(
   progress: Float,
   maxProgress: Float,
@@ -19,15 +21,22 @@ internal fun DrawScope.drawProgressWithText(
   textPaint: TextPaint,
   filledTextPaint: TextPaint
 ) {
+  // Calculate the width of the filled progress bar
+  val filledProgressWidth = size.width * progress / maxProgress
+
+  // Draw the filled progress rectangle
   drawRect(
     topLeft = Offset(0f, 0f),
-    size = Size(size.width * progress / maxProgress, height = size.height),
+    size = Size(filledProgressWidth, height = size.height),
     color = filledProgressColor
   )
 
+  // Draw progress text if provided
   progressText?.let {
+    // Calculate the vertical position of the text
     val yPos = (size.height / 2) - (textPaint.descent() + textPaint.ascent()) / 2
 
+    // Crop text if it exceeds the width of the progress bar
     val croppedText = TextUtils.ellipsize(
       progressText,
       textPaint,
@@ -35,18 +44,21 @@ internal fun DrawScope.drawProgressWithText(
       TextUtils.TruncateAt.END
     ).toString()
 
+    // Draw text on the canvas
     drawIntoCanvas { canvas ->
 
       with(canvas.nativeCanvas) {
         val rect = Rect()
         getClipBounds(rect)
 
+        // Draw original text
         drawText(croppedText, size.width / 2, yPos, textPaint)
 
-        rect.right = (rect.width() * progress / maxProgress).toInt()
-
+        // Clip the canvas to the filled portion of the progress bar
+        rect.right = (filledProgressWidth).toInt()
         clipRect(rect)
 
+        // Draw filled text within the clipped region
         drawText(croppedText, size.width / 2, yPos, filledTextPaint)
       }
     }
