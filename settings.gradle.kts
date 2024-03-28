@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ProgressButtonSample"
+rootProject.name = "Compose-ProgressButton"
 include(":app")
 include(":progressButton")
 
