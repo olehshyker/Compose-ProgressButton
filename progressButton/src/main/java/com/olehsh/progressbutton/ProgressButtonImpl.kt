@@ -1,6 +1,5 @@
 package com.olehsh.progressbutton
 
-import android.text.TextPaint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Indication
@@ -18,11 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
-import androidx.core.content.res.ResourcesCompat
+import androidx.compose.ui.text.rememberTextMeasurer
 
 @Composable
 internal fun ProgressButtonImpl(
@@ -38,7 +34,6 @@ internal fun ProgressButtonImpl(
   border: BorderStroke?,
   buttonColors: ProgressButtonColors,
   textStyle: TextStyle,
-  fontResId: Int?,
   interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
   indication: Indication? = null,
   progressChangeMode: ProgressChangeMode = ProgressChangeMode.AnimatedChange()
@@ -51,34 +46,6 @@ internal fun ProgressButtonImpl(
     )
   }
 
-  val fontSizeInPx = with(LocalDensity.current) {
-    textStyle.fontSize.toPx()
-  }
-
-  val context = LocalContext.current
-
-  val typeFace = remember {
-    fontResId?.let { ResourcesCompat.getFont(context, fontResId) }
-  }
-
-  val textPaint = remember {
-    TextPaint().apply {
-      textAlign = android.graphics.Paint.Align.CENTER
-      color = buttonColors.textColorOnEmpty.toArgb()
-      textSize = fontSizeInPx
-      typeface = typeFace
-    }
-  }
-
-  val filledTextPaint = remember {
-    TextPaint().apply {
-      textAlign = android.graphics.Paint.Align.CENTER
-      color = buttonColors.textColorOnFilled.toArgb()
-      textSize = fontSizeInPx
-      typeface = typeFace
-    }
-  }
-
   LaunchedEffect(key1 = coerced) {
     if (progressChangeMode is ProgressChangeMode.AnimatedChange) {
       animatedProgress.animateTo(
@@ -89,6 +56,9 @@ internal fun ProgressButtonImpl(
       animatedProgress.snapTo(coerced)
     }
   }
+
+  val textMeasurer = rememberTextMeasurer()
+  val filledTextMeasurer = rememberTextMeasurer()
 
   // Drawing the button with progress and text
   Box(
@@ -115,9 +85,11 @@ internal fun ProgressButtonImpl(
           progress = animatedProgress.value,
           maxProgress = maxProgress,
           filledProgressColor = buttonColors.filledBackgroundColor,
+          textColorOnFilled = buttonColors.textColorOnFilled,
           progressText = buttonText,
-          textPaint = textPaint,
-          filledTextPaint = filledTextPaint
+          textMeasurer = textMeasurer,
+          filledTextMeasurer = filledTextMeasurer,
+          textStyle = textStyle
         )
       }
   ) {

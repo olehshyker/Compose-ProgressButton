@@ -47,7 +47,6 @@ fun ProgressButton(
   enabled: Boolean = true,
   buttonColors: ProgressButtonColors = ProgressButtonDefaults.buttonColors(),
   progressChangeMode: ProgressChangeMode = ProgressChangeMode.AnimatedChange(),
-  fontResId: Int? = null,
   interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
   indication: Indication? = null
 ) {
@@ -65,7 +64,6 @@ fun ProgressButton(
     buttonColors = buttonColors,
     textStyle = textStyle,
     buttonText = buttonText,
-    fontResId = fontResId,
     interactionSource = interactionSource,
     indication = indication
   )

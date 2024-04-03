@@ -1,14 +1,17 @@
 package com.olehsh.progressbutton
 
-import android.graphics.Rect
-import android.text.TextPaint
-import android.text.TextUtils
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 
 /**
  * Draws a progress bar with optional text on a canvas.
@@ -17,9 +20,11 @@ internal fun DrawScope.drawProgressWithText(
   progress: Float,
   maxProgress: Float,
   filledProgressColor: Color,
+  textColorOnFilled: Color,
   progressText: String? = null,
-  textPaint: TextPaint,
-  filledTextPaint: TextPaint
+  textMeasurer: TextMeasurer,
+  filledTextMeasurer: TextMeasurer,
+  textStyle: TextStyle
 ) {
   // Calculate the width of the filled progress bar
   val filledProgressWidth = size.width * progress / maxProgress
@@ -31,36 +36,45 @@ internal fun DrawScope.drawProgressWithText(
     color = filledProgressColor
   )
 
-  // Draw progress text if provided
-  progressText?.let {
-    // Calculate the vertical position of the text
-    val yPos = (size.height / 2) - (textPaint.descent() + textPaint.ascent()) / 2
+  val textLayoutResult: TextLayoutResult =
+    textMeasurer.measure(
+      text = AnnotatedString(progressText.orEmpty()),
+      style = textStyle,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      constraints = Constraints(maxWidth = size.width.toInt())
+    )
 
-    // Crop text if it exceeds the width of the progress bar
-    val croppedText = TextUtils.ellipsize(
-      progressText,
-      textPaint,
-      size.width,
-      TextUtils.TruncateAt.END
-    ).toString()
+  val filledTextLayoutResult: TextLayoutResult =
+    filledTextMeasurer.measure(
+      text = AnnotatedString(progressText.orEmpty()),
+      style = textStyle.copy(color = textColorOnFilled),
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      constraints = Constraints(maxWidth = size.width.toInt())
+    )
 
-    // Draw text on the canvas
-    drawIntoCanvas { canvas ->
+  val xPos = (size.width - textLayoutResult.size.width) / 2
+  val yPos =
+    (size.height - textLayoutResult.size.height) / 2 // Adjust for descent
 
-      with(canvas.nativeCanvas) {
-        val rect = Rect()
-        getClipBounds(rect)
+  // Draw text on filled part
+  clipRect(
+    left = filledProgressWidth
+  ) {
+    drawText(
+      textLayoutResult = textLayoutResult,
+      topLeft = Offset(xPos, yPos)
+    )
+  }
 
-        // Draw original text
-        drawText(croppedText, size.width / 2, yPos, textPaint)
-
-        // Clip the canvas to the filled portion of the progress bar
-        rect.right = (filledProgressWidth).toInt()
-        clipRect(rect)
-
-        // Draw filled text within the clipped region
-        drawText(croppedText, size.width / 2, yPos, filledTextPaint)
-      }
-    }
+  // Draw text on unfilled part
+  clipRect(
+    right = filledProgressWidth
+  ) {
+    drawText(
+      textLayoutResult = filledTextLayoutResult,
+      topLeft = Offset(xPos, yPos)
+    )
   }
 }

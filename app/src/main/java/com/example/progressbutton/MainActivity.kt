@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,9 +108,13 @@ fun StartButtonExample() {
       .fillMaxWidth()
       .height(64.dp),
     progress = animatedProgress.value,
-    textStyle = TextStyle.Default.copy(fontSize = 20.sp),
+    textStyle = TextStyle(
+      fontSize = 20.sp,
+      fontFamily = FontFamily(
+        Font(R.font.montserrat_semibold)
+      )
+    ),
     buttonText = buttonText,
-    fontResId = R.font.montserrat_semibold,
     progressChangeMode = ProgressChangeMode.InstantChange,
     onClick = {
       scope.launch {
